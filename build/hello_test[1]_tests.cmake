@@ -1,0 +1,5 @@
+add_test([=[testing.fail]=]  /home/christian/ProgrammerParty/build/hello_test [==[--gtest_filter=testing.fail]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[testing.fail]=]  PROPERTIES WORKING_DIRECTORY /home/christian/ProgrammerParty/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+add_test([=[testing.succeed]=]  /home/christian/ProgrammerParty/build/hello_test [==[--gtest_filter=testing.succeed]==] --gtest_also_run_disabled_tests)
+set_tests_properties([=[testing.succeed]=]  PROPERTIES WORKING_DIRECTORY /home/christian/ProgrammerParty/build SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
+set(  hello_test_TESTS testing.fail testing.succeed)
