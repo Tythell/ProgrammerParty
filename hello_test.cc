@@ -17,3 +17,8 @@ TEST(testing, fail) {
 }
 
 TEST(testing, succeed) { EXPECT_EQ(true, true); }
+TEST(testing, 2Plus2Is4)
+{
+	EXPECT_EQ(4, 2 + 2);
+}
+
