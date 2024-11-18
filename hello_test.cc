@@ -10,15 +10,14 @@
 
 // }
 
-TEST(testing, fail) {
-  std::cout << "Hello test" << std::endl;
-  EXPECT_EQ(false, true);
-  EXPECT_THAT(false, Eq(true));
-}
+// TEST(testing, fail) {
+//   std::cout << "Hello test" << std::endl;
+//   EXPECT_EQ(false, true);
+//   EXPECT_THAT(false, Eq(true));
+// }
 
 TEST(testing, succeed) { EXPECT_EQ(true, true); }
 TEST(testing, 2Plus2Is4)
 {
 	EXPECT_EQ(4, 2 + 2);
 }
-

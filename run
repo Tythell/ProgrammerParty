@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd build
 cmake ./
 make
 GTEST_COLOR=1 ctest -V
+cd ../
