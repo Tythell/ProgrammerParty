@@ -81,6 +81,7 @@ namespace {
         {
             std::swap(numbers[low], numbers[high]);
         }
+        //Csaba: This should be called recursively
         return low;
     }
 
