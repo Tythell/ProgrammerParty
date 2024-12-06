@@ -19,7 +19,7 @@ enable_testing()
 add_executable(
   hello_test
   hello_test.cc
-  QSort2.cc
+  AocDay4Test.cc
 )
 
 target_link_libraries(
