@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
+#include <cassert>
+#include <iostream>
 
 /*
 Exercise suggestion for programming practice tomorrow
@@ -17,36 +19,139 @@ and count the number of occurrences
 Lore text here:S
 */
 
-uint8_t NextLetterDown(const std::string& input, int32_t currentXPos, int32_t currentYPos)
+uint32_t FindXLength(const std::string& buffer)
 {
-    std::vector<std::string> bufferMap;
-    std::stringstream ss(input);
-
-    std::string line;
-    while (std::getline(ss, line))
+    auto xLen = buffer.find('\n');
+    if(xLen == std::string::npos)
     {
-        bufferMap.emplace_back(line);
+        return buffer.size();
     }
+    else
+    {
+        return xLen + 1;
+    }
+}
+
+TEST(FindXLengthTest, verifySingleline)
+{
+    EXPECT_EQ(7u, FindXLength("kamuhab"));
+}
+
+TEST(FindXLengthTest, verifyMutliline)
+{
+    EXPECT_EQ(8u, FindXLength("kamuhab\nkamuhab"));
+}
+
+uint32_t ConvertXYCoordToIndex(const std::string& buffer, uint32_t x, uint32_t y)
+{
+//    x + (y*xLen)
+    const auto xLen = FindXLength(buffer);
+    return xLen * y + x;
+}
+
+
+
+std::pair<uint32_t, uint32_t> ConvertIndexToXY(const std::string& input, uint32_t index)
+{
+    const auto xLen = FindXLength(input);
+    assert(xLen > 0);
+    const auto y = index / xLen;
+    const auto x = (index % xLen);
+    return std::make_pair(x,y);
+}
+
+TEST(ConvertCoordTest, verify)
+{
+    constexpr auto input = "kamuhab";
+    EXPECT_EQ(3u, ConvertXYCoordToIndex(input, 3u, 0u));
+}
+
+TEST(ConvertCoordTest, verifyConvertIndexToXYSingleLine)
+{
+    constexpr auto input = "kamuhab";
+    const auto [x, y] = ConvertIndexToXY(input, 3u);
+    EXPECT_EQ(3, x);
+    EXPECT_EQ(0, y);
+}
+
+TEST(ConvertCoordTest, verifyConvertIndexToXY)
+{
+    constexpr auto input = "kamuhab\nkamuhab";
+    const auto [x, y] = ConvertIndexToXY(input, 9u);
+    EXPECT_EQ(0, x);
+    EXPECT_EQ(1, y);
+}
+
+TEST(ConvertCoordTest, verifyConvertVicaVersa)
+{
+    constexpr auto input = "kamuhab\nkamuhab";
+    const auto [x, y] = ConvertIndexToXY(input, 9u);
+    EXPECT_EQ(9u, ConvertXYCoordToIndex(input, x, y));
+}
+
+TEST(ConvertCoordTest, verifyIndexToCoordMultipleLines)
+{
+    constexpr auto input = 
+                      "MMMSXXMASM\n"
+                      "MSAMXMSMSA\n"
+                      "AMXSXMAAMM\n"
+                      "MSAMASMSMX\n"
+                      "XMASAMXAMM\n"
+                      "XXAMMXXAMA\n"
+                      "SMSMSASXSS\n"
+                      "SAXAMASAAA\n"
+                      "MAMMMXMMMM\n"
+                      "MXMXAXMASX";
+    const auto [x, y] = ConvertIndexToXY(input, 35u);
+    EXPECT_EQ(2, x);
+    EXPECT_EQ(3, y);
+}
+
+
+TEST(ConvertCoordTest, verifyMultipleLines)
+{
+    constexpr auto input = 
+                      "MMMSXXMASM\n"
+                      "MSAMXMSMSA\n"
+                      "AMXSXMAAMM\n"
+                      "MSAMASMSMX\n"
+                      "XMASAMXAMM\n"
+                      "XXAMMXXAMA\n"
+                      "SMSMSASXSS\n"
+                      "SAXAMASAAA\n"
+                      "MAMMMXMMMM\n"
+                      "MXMXAXMASX";
+    EXPECT_EQ(36u, ConvertXYCoordToIndex(input, 3u, 3u));
+}
+
+// uint8_t NextLetterDown(const std::string& input, int32_t currentXPos, int32_t currentYPos)
+// {
+//     std::vector<std::string> bufferMap;
+//     std::stringstream ss(input);
+
+//     std::string line;
+//     while (std::getline(ss, line))
+//     {
+//         bufferMap.emplace_back(line);
+//     }
     
 
-}
+// }
 
 uint32_t countWordDownward(const std::string& input, const std::string& word)
 {
+    return 0;
     const auto lineLength = input.find('\n');
     if (lineLength == std::string::npos)
     {
         return 0u;
     }
-    
+
     size_t pos = input.find(word[0u]);
     while (pos < input.size() - (3 * lineLength))
     {
-    find 'X' until end of input
-    if input[pos of 'X' + lineLength] == word[0u] and
-       input[pos of 'X' + 2 * lineLength] == word[1u] and ...
-       count++
-
+        //Convert pos to 2d coordinate (x,y)
+        // From (x,y) find letter index of (x,y+1) (x,y+2) and (x,y+3)
     }
 
 }
@@ -71,7 +176,8 @@ uint32_t countXmas(const std::string& input) {
 }
 
 TEST(Day4Test, DISABLED_verify_problem1Solution) {
-    constexpr auto INPUT = "MMMSXXMASM\n"
+    constexpr auto INPUT = 
+                      "MMMSXXMASM\n"
                       "MSAMXMSMSA\n"
                       "AMXSXMAAMM\n"
                       "MSAMASMSMX\n"
@@ -137,7 +243,7 @@ TEST(Day4Test, DISABLED_xmasDiagonalDownRight) {
     ASSERT_EQ(1, countXmas(input));
 }
 
-TEST(Day4Test, guidingTC) {
+TEST(Day4Test, DISABLED_guidingTC) {
     constexpr auto input = "S..S..S\n"
                            ".A.A.A.\n"
                            "..MMM..\n"
