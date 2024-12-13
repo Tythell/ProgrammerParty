@@ -137,3 +137,13 @@ TEST(Day4Test, DISABLED_xmasDiagonalDownRight) {
     ASSERT_EQ(1, countXmas(input));
 }
 
+TEST(Day4Test, guidingTC) {
+    constexpr auto input = "S..S..S\n"
+                           ".A.A.A.\n"
+                           "..MMM..\n"
+                           "SAMXMAS\n"
+                           "..MMM..\n"
+                           ".A.A.A.\n"
+                           "S..S..S"
+}
+
