@@ -144,6 +144,8 @@ TEST(Day4Test, guidingTC) {
                            "SAMXMAS\n"
                            "..MMM..\n"
                            ".A.A.A.\n"
-                           "S..S..S"
+                           "S..S..S";
+    
+    ASSERT_EQ(8, countXmas(input));
 }
 
