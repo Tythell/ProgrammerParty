@@ -18,8 +18,7 @@ enable_testing()
 
 add_executable(
   hello_test
-  hello_test.cc
-  AocDay4Test.cc
+  Adventure.cc
 )
 
 target_link_libraries(
