@@ -53,6 +53,30 @@ std::ostream& operator<<(std::ostream& out, const Tile& tile)
     return out;
 }
 
+enum class FeelingE
+{
+    Shining,
+    Smell,
+    Wind,
+    Nothing
+};
+
+enum class DirectionE : std::uint8_t
+{
+    North,
+    East,
+    South,
+    West
+};
+
+constexpr std::string DIRECTION[]
+{
+    "North",
+    "East",
+    "South",
+    "West"
+};
+
 class Dungeon
 {
 public:
@@ -73,16 +97,14 @@ public:
         }
     }
 
+    std::optional<FeelingE> takeStep(DirectionE step)
+    {
+        std::cout << "Taking step towards: " << DIRECTION[static_cast<std::uint8_t>(step)] << "\n";
+        print();
+        return FeelingE::Shining;
+    }
     void print() const
     {
-        // for(const auto& row : m_map)
-        // {
-        //     for(const auto& tile : row)
-        //     {
-        //         std::cout << tile;
-        //     }
-        //     std::cout << std::endl;
-        // }
         std::cout << toString();
     }
     std::string toString() const
@@ -199,6 +221,19 @@ private:
     std::vector<Coordinate> m_traps;
 };
 
+using WayToTreasure = std::string;
+
+class Game
+{
+public:
+    WayToTreasure run(const std::string &file)
+    {
+        auto dungeon = DungeonBuilder().parseFromFile("input.txt");
+        dungeon.print();
+        return {};
+    }
+};
+
 TEST(AdventureGameTest, printTheMap)
 {
     const auto map = DungeonBuilder().
@@ -243,3 +278,53 @@ TEST(AdventureGameTest, printTheMapFromFile)
     std::cout << map.toString() << std::endl;
     //map.print();
 }
+
+TEST(AdventureGameTest, readInputToGameAndPrintIt)
+{
+    Game game;
+    game.run("input.txt");
+    /*
+    std::string desiredMap = 
+//   0 1 2 3 4 5 6 7 8 9
+    ". . . . . . . . . . \n" // 0
+    ". . . . . . . . . . \n" // 1
+    ". . . . . . . . . . \n" // 2
+    "o . . . . . . . . . \n" // 3
+    ". . . . . . . . . . \n" // 4
+    ". . . . . @ . . . . \n" // 5
+    ". . . . . . . . . . \n" // 6
+    ". . . . . . . . . . \n" // 7
+    ". . . . . . # * . . \n" // 8
+    ". . . . . . . # . . \n" // 9
+    ". . . . . . . . . . \n";// 10
+
+    EXPECT_EQ(desiredMap, game.toString());*/
+}
+
+TEST(AdventureGameTest, playerIsAbleToTakeAStepTowardsTreasure)
+{ 
+    auto map = DungeonBuilder().
+                        setDimensions(10u, 10u).
+                        setStartPosition(0u, 3u).
+                        setMonster(5u, 5u).
+                        setTreasure(0u, 4u).
+                        setTraps({{6u, 8u}, {7u, 9u}}).
+                        build();
+    map.print();
+    EXPECT_EQ(FeelingE::Shining, map.takeStep(DirectionE::South));
+}
+
+TEST(AdventureGameTest, playerIsAbleToTakeAStepTowardsNonTreasure)
+{ 
+    auto map = DungeonBuilder().
+                        setDimensions(10u, 10u).
+                        setStartPosition(0u, 3u).
+                        setMonster(5u, 5u).
+                        setTreasure(0u, 4u).
+                        setTraps({{6u, 8u}, {7u, 9u}}).
+                        build();
+    map.print();
+    EXPECT_EQ(FeelingE::Nothing, map.takeStep(DirectionE::North));
+}
+
+
