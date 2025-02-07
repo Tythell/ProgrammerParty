@@ -11,6 +11,11 @@ struct Coordinate
 {
     std::uint32_t x;
     std::uint32_t y;
+
+    bool operator==(const Coordinate& rhs) const
+    {
+        return x == rhs.x && y == rhs.y;
+    }
 };
 
 enum class TileE
@@ -43,6 +48,11 @@ public:
         std::terminate();
     }
 
+    bool isTreasure() const
+    {
+        return m_type == TileE::Treasure;
+    }
+
 private:
     TileE m_type{TileE::Empty};
 };
@@ -58,7 +68,7 @@ enum class FeelingE
     Shining,
     Smell,
     Wind,
-    Nothing
+    Bounce
 };
 
 enum class DirectionE : std::uint8_t
@@ -84,7 +94,8 @@ public:
             const Coordinate& startPosition,
             const Coordinate& monster,
             const Coordinate& treasure,
-            const std::vector<Coordinate>& traps)
+            const std::vector<Coordinate>& traps) : 
+            m_adventurer(startPosition)
     {
         m_map.resize(dimensions.y, std::vector<Tile>(dimensions.x));
         
@@ -97,11 +108,21 @@ public:
         }
     }
 
-    std::optional<FeelingE> takeStep(DirectionE step)
+    std::set<FeelingE> takeStep(DirectionE step)
     {
+        std::set<FeelingE> feelings;
         std::cout << "Taking step towards: " << DIRECTION[static_cast<std::uint8_t>(step)] << "\n";
+        if(!updateTheAdventurer(step))
+        {
+            feelings.insert(FeelingE::Bounce);
+        }
+        if (isTreasure())
+        {
+            feelings.insert(FeelingE::Shining);
+        }
+
         print();
-        return FeelingE::Shining;
+        return feelings;
     }
     void print() const
     {
@@ -122,6 +143,49 @@ public:
     }
     
 private:
+    Tile& getTile(const Coordinate& xy)
+    {
+        return m_map[xy.y][xy.x];
+    }
+
+    const Tile& getTile(const Coordinate& xy) const
+    {
+        return m_map.at(xy.y).at(xy.x);
+    }
+
+    bool updateTheAdventurer(DirectionE step)
+    {
+        //TODO maybe the step cannot be made
+        switch(step){
+            case DirectionE::North:
+            m_adventurer.y--;
+            break;
+            case DirectionE::South:
+            m_adventurer.y++;
+            break;
+            case DirectionE::East:
+            m_adventurer.x++;
+            break;
+            case DirectionE::West:
+            if(m_adventurer.x != 0)
+            {
+                m_adventurer.x--;
+            }
+            else
+            {
+                return false;
+            }
+            break;
+        }
+        return true;
+    }
+
+    bool isTreasure() const
+    {
+        return getTile(m_adventurer).isTreasure();
+    }
+
+    Coordinate m_adventurer;
     std::vector<std::vector<Tile>> m_map;
 };
 
@@ -311,10 +375,10 @@ TEST(AdventureGameTest, playerIsAbleToTakeAStepTowardsTreasure)
                         setTraps({{6u, 8u}, {7u, 9u}}).
                         build();
     map.print();
-    EXPECT_EQ(FeelingE::Shining, map.takeStep(DirectionE::South));
+    EXPECT_EQ(std::set<FeelingE>({FeelingE::Shining}), map.takeStep(DirectionE::South));
 }
 
-TEST(AdventureGameTest, playerIsAbleToTakeAStepTowardsNonTreasure)
+TEST(AdventureGameTest, playerIsAbleToTakeAStepTowardsNorthWhichIsNonTreasure)
 { 
     auto map = DungeonBuilder().
                         setDimensions(10u, 10u).
@@ -324,7 +388,33 @@ TEST(AdventureGameTest, playerIsAbleToTakeAStepTowardsNonTreasure)
                         setTraps({{6u, 8u}, {7u, 9u}}).
                         build();
     map.print();
-    EXPECT_EQ(FeelingE::Nothing, map.takeStep(DirectionE::North));
+
+    EXPECT_EQ(std::set<FeelingE>({}), map.takeStep(DirectionE::North));
 }
 
+TEST(AdventureGameTest, playerIsAbleToTakeAStepTowardsEastWhichIsNonTreasure)
+{ 
+    auto map = DungeonBuilder().
+                        setDimensions(10u, 10u).
+                        setStartPosition(0u, 3u).
+                        setMonster(5u, 5u).
+                        setTreasure(0u, 4u).
+                        setTraps({{6u, 8u}, {7u, 9u}}).
+                        build();
+    map.print();
 
+    EXPECT_EQ(std::set<FeelingE>({}), map.takeStep(DirectionE::East));
+}
+
+TEST(AdventureGameTest, playerIsAbleToTakeAStepTowardsWestWhichIsNonTreasure)
+{
+    auto map = DungeonBuilder().
+                        setDimensions(10u, 10u).
+                        setStartPosition(0u, 3u).
+                        setMonster(5u, 5u).
+                        setTreasure(0u, 4u).
+                        setTraps({{6u, 8u}, {7u, 9u}}).
+                        build();
+    map.print();
+    EXPECT_EQ(std::set<FeelingE>({FeelingE::Bounce}), map.takeStep(DirectionE::West));
+}
