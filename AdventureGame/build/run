@@ -1,0 +1,2 @@
+sh compile
+GTEST_COLOR=1 ./AdventureGame

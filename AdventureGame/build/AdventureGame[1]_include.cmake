@@ -1,0 +1,5 @@
+if(EXISTS "/home/kamuhab/projects/ProgrammerParty/AdventureGame/build/AdventureGame[1]_tests.cmake")
+  include("/home/kamuhab/projects/ProgrammerParty/AdventureGame/build/AdventureGame[1]_tests.cmake")
+else()
+  add_test(AdventureGame_NOT_BUILT AdventureGame_NOT_BUILT)
+endif()
