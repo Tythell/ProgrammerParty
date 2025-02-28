@@ -175,3 +175,5 @@ TEST(DungeonTest, playerCanSenseWindyTrap)
     map.print();
     EXPECT_EQ(std::set<FeelingE>({FeelingE::Wind}), map.takeStep(DirectionE::East));
 }
+
+//TODO verify that bouncing back to treasure has the feeling Shining

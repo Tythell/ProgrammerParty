@@ -1,2 +1,1 @@
-sh compile
-GTEST_COLOR=1 ./AdventureGame
+GTEST_COLOR=1 cmake . && make && ./AdventureGame

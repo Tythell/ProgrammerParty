@@ -26,13 +26,7 @@ enum class DirectionE : std::uint8_t
     West
 };
 
-constexpr std::string DIRECTION[]
-{
-    "North",
-    "East",
-    "South",
-    "West"
-};
+std::string toString(const DirectionE direction);
 
 class Dungeon
 {
@@ -56,8 +50,8 @@ public:
 
     std::set<FeelingE> takeStep(DirectionE step)
     {
+        std::cout << "Taking step towards: " << ::toString(step) << "\n";
         std::set<FeelingE> feelings;
-        std::cout << "Taking step towards: " << DIRECTION[static_cast<std::uint8_t>(step)] << "\n";
         if(!updateTheAdventurer(step))
         {
             feelings.insert(FeelingE::Bounce);
@@ -105,8 +99,9 @@ private:
         //TODO calculate the coordinates of the neighbors
         //return true if any one of them is trap
         const auto neighbours = getNeighbours();
-        return false;
+        return false; //std::none_of(neighbours, isTrap);
     }
+
     Tile& getTile(const Coordinate& xy)
     {
         return m_map[xy.y][xy.x];
@@ -119,47 +114,49 @@ private:
 
     bool updateTheAdventurer(DirectionE step)
     {
-        auto oldPosition = m_adventurer;
-        switch(step){
-            case DirectionE::North:
-            if(m_adventurer.y != 0)
-            {
-                m_adventurer.y--;
-            } else {
-                return false;
-            }            
-            break;
-            case DirectionE::South:
-            if(m_adventurer.y >= m_map.size() - 1){
-                return false;
-            }else {
-                m_adventurer.y++;
-            }
-            break;
-            case DirectionE::East:
-            if (m_adventurer.x == m_map.at(m_adventurer.y).size() - 1)
-            {
-                return false;
-            }
-            else
-            {
-                m_adventurer.x++;
-            }
-            break;
-            case DirectionE::West:
-            if(m_adventurer.x != 0)
-            {
-                m_adventurer.x--;
-            }
-            else
-            {
-                return false;
-            }
-            break;
+        if (canAdventurerTakeStep(step))
+        {
+            const auto oldPosition = m_adventurer;
+            moveAdventurer(step);
+            getTile(oldPosition).set(TileE::Empty);
+            getTile(m_adventurer).set(TileE::Adventurer);
+            return true;    
         }
-        getTile(oldPosition).set(TileE::Empty);
-        getTile(m_adventurer).set(TileE::Adventurer);
-        return true;
+        else
+        {
+            return false;
+        }
+    }
+
+    void moveAdventurer(const DirectionE step)
+    {
+        switch(step)
+        {
+            case DirectionE::North: 
+                m_adventurer.y--;
+                break;
+            case DirectionE::South: 
+                m_adventurer.y++; 
+                break;
+            case DirectionE::East: 
+                m_adventurer.x++;
+                break;
+            case DirectionE::West: 
+                m_adventurer.x--;
+                break;
+        }
+    }
+
+    bool canAdventurerTakeStep(const DirectionE step) const
+    {
+        switch(step)
+        {
+            case DirectionE::North: return m_adventurer.y > 0;
+            case DirectionE::South: return m_adventurer.y < m_map.size() - 1;
+            case DirectionE::East: return m_adventurer.x < m_map.at(m_adventurer.y).size() - 1;
+            case DirectionE::West: return m_adventurer.x > 0;
+        }
+        return false;
     }
 
     bool isTreasure() const
