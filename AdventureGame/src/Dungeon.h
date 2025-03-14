@@ -107,20 +107,19 @@ public:
 
     bool shoot(DirectionE direction)
     {
-        if (m_numberOfShotsLeft == 0u)
+        if (m_numberOfShotsLeft > 0u)
         {
-            return false;
-        }
-        --m_numberOfShotsLeft;
+            --m_numberOfShotsLeft;
 
-        auto target = m_adventurer;
-        while (canAdventurerTakeStep(direction, target))
-        {
-            target = calculateStep(direction, target);
-            if(getTile(target).isMonster())
+            auto target = m_adventurer;
+            while (canAdventurerTakeStep(direction, target))
             {
-                getTile(target).set(TileE::Empty);
-                return true;
+                target = calculateStep(direction, target);
+                if(getTile(target).isMonster())
+                {
+                    getTile(target).set(TileE::Empty);
+                    return true;
+                }
             }
         }
         return false;
