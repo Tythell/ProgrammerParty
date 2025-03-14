@@ -95,11 +95,47 @@ public:
         return ss.str();
     }
     
+    bool pickTheTreasure() 
+    {
+        if(isTreasure())
+        {
+           getTile(m_adventurer).setTreasure(false);
+           return true;
+        }
+        return false;
+    }
+
+    bool shoot(DirectionE direction)
+    {
+        if (m_numberOfShotsLeft == 0u)
+        {
+            return false;
+        }
+        --m_numberOfShotsLeft;
+
+        auto target = m_adventurer;
+        while (canAdventurerTakeStep(direction, target))
+        {
+            target = calculateStep(direction, target);
+            if(getTile(target).isMonster())
+            {
+                getTile(target).set(TileE::Empty);
+                return true;
+            }
+        }
+        return false;
+    }
+    
 private:
     Coordinate calculateStep(DirectionE direction) const
+    {
+        return calculateStep(direction, m_adventurer);
+    }
+
+    Coordinate calculateStep(DirectionE direction, const Coordinate& position) const
     {    
-        assert(canAdventurerTakeStep(direction));
-        Coordinate newCoordinate = m_adventurer;
+        assert(canAdventurerTakeStep(direction, position));
+        Coordinate newCoordinate = position;
     
         switch(direction)
         {
@@ -172,12 +208,17 @@ private:
 
     bool canAdventurerTakeStep(const DirectionE step) const
     {
+        return canAdventurerTakeStep(step, m_adventurer);
+    }
+
+    bool canAdventurerTakeStep(const DirectionE step, const Coordinate& position) const
+    {
         switch(step)
         {
-            case DirectionE::North: return m_adventurer.y > 0;
-            case DirectionE::South: return m_adventurer.y < m_map.size() - 1;
-            case DirectionE::East: return m_adventurer.x < m_map.at(m_adventurer.y).size() - 1;
-            case DirectionE::West: return m_adventurer.x > 0;
+            case DirectionE::North: return position.y > 0;
+            case DirectionE::South: return position.y < m_map.size() - 1;
+            case DirectionE::East: return position.x < m_map.at(position.y).size() - 1;
+            case DirectionE::West: return position.x > 0;
         }
         return false;
     }
@@ -188,5 +229,6 @@ private:
     }
 
     Coordinate m_adventurer;
+    std::uint32_t m_numberOfShotsLeft{1u};
     std::vector<std::vector<Tile>> m_map;
 };

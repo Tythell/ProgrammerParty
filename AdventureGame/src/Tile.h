@@ -33,9 +33,9 @@ public:
         std::terminate();
     }
 
-    void setTreasure() 
+    void setTreasure(bool isIt = true) 
     {
-        m_isTreasure = true;
+        m_isTreasure = isIt;
     }
 
     bool isTreasure() const
