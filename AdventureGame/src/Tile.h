@@ -43,6 +43,16 @@ public:
         return m_isTreasure;
     }
 
+    bool isTrap() const
+    {
+        return m_type == TileE::Trap;
+    }
+
+    bool isMonster() const
+    {
+        return m_type == TileE::Monster;
+    }
+
 private:
     std::string getAdditonalInfo() const
     {

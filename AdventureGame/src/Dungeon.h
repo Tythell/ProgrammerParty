@@ -9,6 +9,9 @@
 #include <set>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
+#include <functional>
+#include <cassert>
 
 enum class FeelingE
 {
@@ -64,6 +67,10 @@ public:
         {
             feelings.insert(FeelingE::Wind);
         }
+        if(isMonsterAround())
+        {
+            feelings.insert(FeelingE::Smell);
+        }
 
         print();
         return feelings;
@@ -89,17 +96,52 @@ public:
     }
     
 private:
-    std::vector<Coordinate> getNeighbours() const
+    Coordinate calculateStep(DirectionE direction) const
+    {    
+        assert(canAdventurerTakeStep(direction));
+        Coordinate newCoordinate = m_adventurer;
+    
+        switch(direction)
+        {
+            case DirectionE::North: 
+                newCoordinate.y--;
+                break;
+            case DirectionE::South: 
+                newCoordinate.y++; 
+                break;
+            case DirectionE::East: 
+                newCoordinate.x++;
+                break;
+            case DirectionE::West: 
+                newCoordinate.x--;
+                break;
+        }
+        return newCoordinate;
+    }
+
+    std::vector<Tile> getNeighbours() const
     {
-        return {};
+        std::vector<Tile> neighbours;
+        constexpr auto NUMBER_OF_DIRECTIONS{4u};
+        neighbours.reserve(NUMBER_OF_DIRECTIONS);
+        for(auto direction : {DirectionE::North, DirectionE::East, DirectionE::South, DirectionE::West})
+        {
+            if (canAdventurerTakeStep(direction))
+            {
+                neighbours.push_back(getTile(calculateStep(direction)));
+            }
+        }
+        return neighbours;
+    }
+
+    bool isMonsterAround() const
+    {
+        return std::ranges::any_of(getNeighbours(), std::mem_fn(&Tile::isMonster));
     }
 
     bool isTrapAround() const
     {
-        //TODO calculate the coordinates of the neighbors
-        //return true if any one of them is trap
-        const auto neighbours = getNeighbours();
-        return false; //std::none_of(neighbours, isTrap);
+        return std::ranges::any_of(getNeighbours(), std::mem_fn(&Tile::isTrap));
     }
 
     Tile& getTile(const Coordinate& xy)
@@ -116,34 +158,15 @@ private:
     {
         if (canAdventurerTakeStep(step))
         {
-            const auto oldPosition = m_adventurer;
-            moveAdventurer(step);
-            getTile(oldPosition).set(TileE::Empty);
+            getTile(m_adventurer).set(TileE::Empty);
+            m_adventurer = calculateStep(step);
             getTile(m_adventurer).set(TileE::Adventurer);
+
             return true;    
         }
         else
         {
             return false;
-        }
-    }
-
-    void moveAdventurer(const DirectionE step)
-    {
-        switch(step)
-        {
-            case DirectionE::North: 
-                m_adventurer.y--;
-                break;
-            case DirectionE::South: 
-                m_adventurer.y++; 
-                break;
-            case DirectionE::East: 
-                m_adventurer.x++;
-                break;
-            case DirectionE::West: 
-                m_adventurer.x--;
-                break;
         }
     }
 
