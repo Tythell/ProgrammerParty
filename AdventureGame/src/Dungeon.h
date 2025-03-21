@@ -49,6 +49,7 @@ public:
         {
             getTile(trap).set(TileE::Trap);
         }
+        print();
     }
 
     std::set<FeelingE> takeStep(DirectionE step)
