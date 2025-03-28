@@ -18,7 +18,8 @@ enum class FeelingE
     Shining,
     Smell,
     Wind,
-    Bounce
+    Bounce,
+    DeadSleepy
 };
 
 enum class DirectionE : std::uint8_t
@@ -44,7 +45,7 @@ public:
         m_map.resize(dimensions.y, std::vector<Tile>(dimensions.x));
         getTile(startPosition).set(TileE::Adventurer);
         getTile(monster).set(TileE::Monster);
-        getTile(treasure).setTreasure() ;
+        getTile(treasure).set(TileE::Treasure);
         for(const auto& trap : traps)
         {
             getTile(trap).set(TileE::Trap);
@@ -52,79 +53,18 @@ public:
         print();
     }
 
-    std::set<FeelingE> takeStep(DirectionE step)
-    {
-        std::cout << "Taking step towards: " << ::toString(step) << "\n";
-        std::set<FeelingE> feelings;
-        if(!updateTheAdventurer(step))
-        {
-            feelings.insert(FeelingE::Bounce);
-        }
-        if (isTreasure())
-        {
-            feelings.insert(FeelingE::Shining);
-        }
-        if (isTrapAround())
-        {
-            feelings.insert(FeelingE::Wind);
-        }
-        if(isMonsterAround())
-        {
-            feelings.insert(FeelingE::Smell);
-        }
-
-        print();
-        return feelings;
-    }
+    std::set<FeelingE> takeStep(DirectionE step);
 
     void print() const
     {
         std::cout << toString();
     }
 
-    std::string toString() const
-    {
-        std::stringstream ss;
-        for(const auto& row : m_map)
-        {
-            for(const auto& tile : row)
-            {
-                ss << tile;
-            }
-            ss << std::endl;
-        }
-        return ss.str();
-    }
+    std::string toString() const;
     
-    bool pickTheTreasure() 
-    {
-        if(isTreasure())
-        {
-           getTile(m_adventurer).setTreasure(false);
-           return true;
-        }
-        return false;
-    }
+    bool pickTheTreasure();
 
-    bool shoot(DirectionE direction)
-    {
-        if (m_numberOfShotsLeft > 0u)
-        {
-            --m_numberOfShotsLeft;
-
-            auto target = m_adventurer;
-            while (canAdventurerTakeStep(direction, target))
-            {
-                target = calculateStep(direction, target);
-                if(getTile(target).isMonster())
-                {
-                    getTile(target).set(TileE::Empty);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+    bool shoot(DirectionE direction);
     
 private:
     Coordinate calculateStep(DirectionE direction) const
@@ -132,52 +72,32 @@ private:
         return calculateStep(direction, m_adventurer);
     }
 
-    Coordinate calculateStep(DirectionE direction, const Coordinate& position) const
-    {    
-        assert(canAdventurerTakeStep(direction, position));
-        Coordinate newCoordinate = position;
-    
-        switch(direction)
-        {
-            case DirectionE::North: 
-                newCoordinate.y--;
-                break;
-            case DirectionE::South: 
-                newCoordinate.y++; 
-                break;
-            case DirectionE::East: 
-                newCoordinate.x++;
-                break;
-            case DirectionE::West: 
-                newCoordinate.x--;
-                break;
-        }
-        return newCoordinate;
-    }
+    Coordinate calculateStep(DirectionE direction, const Coordinate& position) const;
 
-    std::vector<Tile> getNeighbours() const
+    std::vector<Tile> getNeighbours() const;
+
+    bool isTypeAround(TileE type) const
     {
-        std::vector<Tile> neighbours;
-        constexpr auto NUMBER_OF_DIRECTIONS{4u};
-        neighbours.reserve(NUMBER_OF_DIRECTIONS);
-        for(auto direction : {DirectionE::North, DirectionE::East, DirectionE::South, DirectionE::West})
+        // TODO: Refactor this with std::any_of
+        // I couldn't get std::ranges::any_of to work with is(TypeE) function
+        bool isAround = false;
+        for (auto& neighbour : getNeighbours())
         {
-            if (canAdventurerTakeStep(direction))
-            {
-                neighbours.push_back(getTile(calculateStep(direction)));
-            }
+            isAround |= neighbour.is(type);
         }
-        return neighbours;
+        return isAround;
     }
 
     bool isMonsterAround() const
     {
-        return std::ranges::any_of(getNeighbours(), std::mem_fn(&Tile::isMonster));
+        return isTypeAround(TileE::Monster);
+        // return std::ranges::any_of(getNeighbours(), std::mem_fn(&Tile::isMonster()));
     }
 
     bool isTrapAround() const
     {
-        return std::ranges::any_of(getNeighbours(), std::mem_fn(&Tile::isTrap));
+        return isTypeAround(TileE::Trap);
+        // return std::ranges::any_of(getNeighbours(), std::mem_fn(&Tile::isTrap()));
     }
 
     Tile& getTile(const Coordinate& xy)
@@ -190,44 +110,26 @@ private:
         return m_map.at(xy.y).at(xy.x);
     }
 
-    bool updateTheAdventurer(DirectionE step)
-    {
-        if (canAdventurerTakeStep(step))
-        {
-            getTile(m_adventurer).set(TileE::Empty);
-            m_adventurer = calculateStep(step);
-            getTile(m_adventurer).set(TileE::Adventurer);
-
-            return true;    
-        }
-        else
-        {
-            return false;
-        }
-    }
+    bool updateTheAdventurer(DirectionE step);
 
     bool canAdventurerTakeStep(const DirectionE step) const
     {
         return canAdventurerTakeStep(step, m_adventurer);
     }
 
-    bool canAdventurerTakeStep(const DirectionE step, const Coordinate& position) const
-    {
-        switch(step)
-        {
-            case DirectionE::North: return position.y > 0;
-            case DirectionE::South: return position.y < m_map.size() - 1;
-            case DirectionE::East: return position.x < m_map.at(position.y).size() - 1;
-            case DirectionE::West: return position.x > 0;
-        }
-        return false;
-    }
+    bool canAdventurerTakeStep(const DirectionE step, const Coordinate& position) const;
 
     bool isTreasure() const
     {
-        return getTile(m_adventurer).isTreasure();
+        return getTile(m_adventurer).is(TileE::Treasure);
+    }
+    
+    bool isMonster() const
+    {
+        return getTile(m_adventurer).is(TileE::Monster);
     }
 
+    bool m_isAdventurerAlive = true;
     Coordinate m_adventurer;
     std::uint32_t m_numberOfShotsLeft{1u};
     std::vector<std::vector<Tile>> m_map;

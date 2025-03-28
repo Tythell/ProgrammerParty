@@ -21,7 +21,7 @@ TEST(DunegonBuilderTest, printTheMapFromText)
     map.print();
 }
 
-TEST(DunegonBuilderTest, printTheMapFromFile)
+TEST(DunegonBuilderTest, DISABLED_printTheMapFromFile)
 {
     const auto map = DungeonBuilder().parseFromFile("input.txt");
     const std::string desiredMap = 

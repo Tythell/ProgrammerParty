@@ -235,3 +235,13 @@ TEST(DungeonTest, playerCannotShootTwice)
     EXPECT_FALSE(map.shoot(DirectionE::East));
     EXPECT_EQ(std::set<FeelingE>({FeelingE::Wind, FeelingE::Smell}), map.takeStep(DirectionE::East));
 }
+
+TEST(DungeonTest, monsterCanKillPlayer)
+{ 
+    auto map = DungeonBuilder().                        
+                        setStartPosition(0u, 0u).
+                        setMonster(1u, 0u).
+                        build();
+    
+    EXPECT_EQ(std::set<FeelingE>({FeelingE::DeadSleepy}), map.takeStep(DirectionE::East));
+}

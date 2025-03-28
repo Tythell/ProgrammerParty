@@ -3,13 +3,14 @@
 #include <string>
 #include <exception>
 #include <iostream>
+#include <set>
 
 enum class TileE
 {
-    Empty,
     Adventurer,
     Monster,
-    Trap
+    Trap,
+    Treasure
 };
 
 class Tile
@@ -17,50 +18,68 @@ class Tile
 public:
     void set(TileE type)
     {
-        m_type = type;
+        m_types.insert(type);
     }
-
+    void remove(TileE type)
+    {
+        m_types.erase(type);
+    }
+    bool is(TileE type) const
+    {
+        return m_types.contains(type);
+    }
     std::string toString() const
     {
-        switch (m_type)
+        if (m_types.empty())
         {
-            case TileE::Empty : return "." + getAdditonalInfo();
-            case TileE::Adventurer : return "o" + getAdditonalInfo();
-            case TileE::Monster : return "@" + getAdditonalInfo();
-            case TileE::Trap : return "#" + getAdditonalInfo();
+            return ".   ";
         }
-        
-        std::terminate();
+
+        std::string toStringTile = "";
+        if (is(TileE::Treasure))
+        {
+            toStringTile.append("*");
+        }
+        if (is(TileE::Monster))
+        {
+            toStringTile.append("@");
+        }
+        if (is(TileE::Trap))
+        {
+            toStringTile.append("#");
+        }
+        if (is(TileE::Adventurer))
+        {
+            toStringTile.append("o");
+        }
+
+        toStringTile.append(std::string(4 - toStringTile.size(), ' '));
+
+        return toStringTile;
     }
 
-    void setTreasure(bool isIt = true) 
-    {
-        m_isTreasure = isIt;
-    }
+    // bool isTreasure() const
+    // {
+    //     return m_types.contains(TileE::Treasure);
+    // }
 
-    bool isTreasure() const
-    {
-        return m_isTreasure;
-    }
+    // bool isTrap() const
+    // {
+    //     return m_types.contains(TileE::Trap);
+    // }
 
-    bool isTrap() const
-    {
-        return m_type == TileE::Trap;
-    }
+    // bool isMonster() const
+    // {
+    //     return m_types.contains(TileE::Monster);
+    // }
 
-    bool isMonster() const
-    {
-        return m_type == TileE::Monster;
-    }
+    // bool isAdventurer() const
+    // {
+    //     return m_types.contains(TileE::Adventurer);
+    // }
 
 private:
-    std::string getAdditonalInfo() const
-    {
-        return m_isTreasure ? "*" : " ";
-    }
-
-    TileE m_type{TileE::Empty};
-    bool m_isTreasure{false};
+    std::set<TileE> m_types{};
 };
 
 std::ostream& operator<<(std::ostream& out, const Tile& tile);

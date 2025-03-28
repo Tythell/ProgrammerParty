@@ -35,16 +35,15 @@ TEST_P(TileRepresentantionTest, verifyTilesCanContainTreasure)
 {
     Tile tile;
     tile.set(getType());
-    tile.setTreasure();
-    EXPECT_TRUE(tile.isTreasure());
+    tile.set(TileE::Treasure);
+    EXPECT_TRUE(tile.is(TileE::Treasure));
     EXPECT_TRUE(tile.toString().find('*') != std::string::npos);
 }
 
 INSTANTIATE_TEST_SUITE_P(
     validTypes,
     TileRepresentantionTest,
-    testing::Values(TestData{TileE::Empty, ". "},
-                    TestData{TileE::Adventurer, "o "},
-                    TestData{TileE::Monster, "@ "},
-                    TestData{TileE::Trap, "# "})
+    testing::Values(               TestData{TileE::Adventurer, "o   "},
+                    TestData{TileE::Monster, "@   "},
+                    TestData{TileE::Trap, "#   "})
 );
